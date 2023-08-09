@@ -9,13 +9,14 @@ const cors = require('cors')
 app.use(express.json());
 app.use(cors())
 
+//post 
 app.post('/orders', async (req, res) => {
   try {
     const { ordered_on, totalPrice, deliveryAddress, items } = req.body;
     const orderId = await Order.create(ordered_on, totalPrice, deliveryAddress);
 
     for (const item of items) {
-      await Item.create(orderId, item.productname, item.productprice, item.quantity);
+      await Item.create(orderId, item.productname, item.productprice, item.quantity, item.image, item.offer, item.subcategory, item.uom);
     }
 
     const createdOrder = await Order.getWithItems(orderId);
@@ -26,29 +27,13 @@ app.post('/orders', async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//get
 app.get('/orders', async (req, res) => {
   try {
     const query = `
       SELECT o.id, o.ordered_on, o.totalPrice, o.deliveryAddress,
-             i.productname, i.productprice, i.quantity
+             i.productname, i.productprice, i.quantity,
+             i.image, i.offer, i.subcategory, i.uom
       FROM orders o
       LEFT JOIN items i ON o.id = i.orderId
     `;
@@ -64,7 +49,6 @@ app.get('/orders', async (req, res) => {
 
       console.log('Rows retrieved:', rows);
 
-      // Format the retrieved data if needed
       const orders = [];
       let currentOrderId = null;
       let currentOrder = null;
@@ -87,6 +71,10 @@ app.get('/orders', async (req, res) => {
           productname: row.productname,
           productprice: row.productprice,
           quantity: row.quantity,
+          image: row.image,         // Include the image property
+          offer: row.offer,         // Include the offer property
+          subcategory: row.subcategory, // Include the subcategory property
+          uom: row.uom              // Include the uom property
         });
       });
 
@@ -103,6 +91,7 @@ app.get('/orders', async (req, res) => {
 });
 
 
+//delete
 app.delete('/orders/:id', async (req, res) => {
   try {
     const orderId = req.params.id;

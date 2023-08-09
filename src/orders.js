@@ -17,7 +17,8 @@ const Order = {
   getWithItems: (orderId) => {
     return new Promise((resolve, reject) => {
       const query = `
-        SELECT o.*, i.productname, i.productprice, i.quantity
+        SELECT o.*, i.productname, i.productprice, i.quantity,
+               i.image, i.offer, i.subcategory, i.uom
         FROM orders o
         JOIN items i ON o.id = i.orderId
         WHERE o.id = ?
@@ -34,7 +35,11 @@ const Order = {
             items: rows.map(row => ({
               productname: row.productname,
               productprice: row.productprice,
-              quantity: row.quantity
+              quantity: row.quantity,
+              image: row.image,
+              offer: row.offer,
+              subcategory: row.subcategory,
+              uom: row.uom
             }))
           };
           resolve(order);
@@ -45,10 +50,10 @@ const Order = {
 };
 
 const Item = {
-  create: (orderId, productname, productprice, quantity) => {
+  create: (orderId, productname, productprice, quantity, image, offer, subcategory, uom) => {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO items (orderId, productname, productprice, quantity) VALUES (?, ?, ?, ?)`;
-      db.run(query, [orderId, productname, productprice, quantity], function (err) {
+      const query = `INSERT INTO items (orderId, productname, productprice, quantity, image, offer, subcategory, uom) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+      db.run(query, [orderId, productname, productprice, quantity, image, offer, subcategory, uom], function (err) {
         if (err) {
           reject(err);
         } else {
@@ -60,7 +65,6 @@ const Item = {
 };
 
 module.exports = { Order, Item };
-
 
 
 
